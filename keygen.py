@@ -24,7 +24,7 @@ class KeyGenerator:
         887, 907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997
     ]
 
-    def __init__(self, p_size: int, q_size: int, prefix: str = "rsa"):
+    def __init__(self, p_size: int, q_size: int, prefix: str = "key"):
         self.__p = self.get_primary_num(p_size)
         self.__q = self.get_primary_num(q_size)
         self.__module = self.__p * self.__q
@@ -127,8 +127,8 @@ class KeyGenerator:
         public_key_path = "{}.pub".format(prefix)
         secret_key_path = "{}.secret".format(prefix)
 
-        public_key = hex(self.__public_key)
-        secret_key = hex(self.__secret_key)
+        public_key = "{}/{}".format(hex(self.__public_key), hex(self.__euler)).upper()
+        secret_key = "{}/{}".format(hex(self.__secret_key), hex(self.__euler)).upper()
 
         with open(public_key_path, "w") as public_key_file:
             public_key_file.write(public_key)
