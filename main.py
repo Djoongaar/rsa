@@ -24,13 +24,14 @@ class KeyGenerator:
         887, 907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997
     ]
 
-    def __init__(self, p_size: int, q_size: int):
-        self.p = self.get_primary_num(p_size)
-        self.q = self.get_primary_num(q_size)
-        self.module = self.p * self.q
-        self.euler = (self.p - 1) * (self.q - 1)
-        self.public_key = self.get_public_key(p_size + q_size)
-        self.secret_key = self.get_secret_key()
+    def __init__(self, p_size: int, q_size: int, prefix: str = "rsa"):
+        self.__p = self.get_primary_num(p_size)
+        self.__q = self.get_primary_num(q_size)
+        self.__module = self.__p * self.__q
+        self.__euler = (self.__p - 1) * (self.__q - 1)
+        self.__public_key = self.__get_public_key(p_size + q_size)
+        self.__secret_key = self.__get_secret_key()
+        self.__write_keys(prefix)
 
     @staticmethod
     def get_primary_num(n: int) -> int:
@@ -51,39 +52,15 @@ class KeyGenerator:
                 return num
 
     @staticmethod
-    def get_relative_primary_num(n: int) -> int:
-        pass
+    def get_random_with_size(n: int) -> int:
+        """ Возвращает число взаимнопростое с заданным """
 
-    def euclidean(self) -> int:
-        """
-        Расширенный алгоритм Евклида
-        :param e: Число обратное которому требуется найти
-        :param n: Модуль алгоритма
-        :return: Число обратное числу e
-        """
-        d = 0
-        x1 = 0
-        x2 = 1
-        y1 = 1
-        temp_phi = self.euler
-        e = self.public_key
-
-        while e > 0:
-            temp1 = temp_phi // e
-            temp2 = temp_phi - temp1 * e
-            temp_phi = e
-            e = temp2
-
-            x = x2 - temp1 * x1
-            y = d - temp1 * y1
-
-            x2 = x1
-            x1 = x
-            d = y1
-            y1 = y
-
-        if temp_phi == 1:
-            return d + self.euler
+        while True:
+            num = random.randrange(2 ** (n - 1), 2 ** n - 1)
+            # Берем только числа со старшим битом 1
+            # иначе будет не верная разрядность
+            if num >> n - 1 == 1:
+                return num
 
     @staticmethod
     def test_fermat(num: int, n: int, iterations: int) -> bool:
@@ -101,27 +78,60 @@ class KeyGenerator:
                 return False
         return True
 
-    def get_public_key(self, key_size) -> int:
+    def __euclidean(self) -> int:
         """
-        Выбирает взаимнопростое число с self.euler и записывает его в файл
+        Расширенный алгоритм Евклида
+        :return: Число обратное числу e
         """
-        e = self.get_primary_num(key_size)
-        g = math.gcd(e, self.euler)
+        d = 0
+        x1 = 0
+        x2 = 1
+        y1 = 1
+        temp_phi = self.__euler
+        e = self.__public_key
+
+        while e > 0:
+            temp1 = temp_phi // e
+            temp2 = temp_phi - temp1 * e
+            temp_phi = e
+            e = temp2
+
+            x = x2 - temp1 * x1
+            y = d - temp1 * y1
+
+            x2 = x1
+            x1 = x
+            d = y1
+            y1 = y
+
+        if temp_phi == 1:
+            return d + self.__euler
+
+    def __get_public_key(self, key_size) -> int:
+        """ Выбирает взаимнопростое число с self.euler и записывает его в файл """
+        e = self.get_random_with_size(key_size)
+        g = math.gcd(e, self.__euler)
         while g != 1:
-            e = self.get_primary_num(key_size)
-            g = math.gcd(e, self.euler)
+            e = self.get_random_with_size(key_size)
+            g = math.gcd(e, self.__euler)
         return e
 
-    def get_secret_key(self):
+    def __get_secret_key(self) -> int:
         """
         Вычисляет обратное значение от self.public_key, то есть чтобы
         self.public_key * self.secret_key = 1 (по модулю self.euler)
         """
-        return self.euclidean()
+        return self.__euclidean()
 
-    def __str__(self):
-        return "{}: [public_key: {}, len: {}]".format(
-            str(self.__class__),
-            str(bin(self.public_key)),
-            len(str(bin(self.public_key)))
-        )
+    def __write_keys(self, prefix: str) -> None:
+        public_key_path = "{}.pub".format(prefix)
+        secret_key_path = "{}.secret".format(prefix)
+
+        public_key = hex(self.__public_key)
+        secret_key = hex(self.__secret_key)
+
+        with open(public_key_path, "w") as public_key_file:
+            public_key_file.write(public_key)
+
+        with open(secret_key_path, "w") as secret_key_file:
+            secret_key_file.write(secret_key)
