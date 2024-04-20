@@ -29,7 +29,7 @@ class KeyGenerator:
         self.__q = self.get_primary_num(q_size)
         self.__module = self.__p * self.__q
         self.__euler = (self.__p - 1) * (self.__q - 1)
-        self.__public_key = self.__get_public_key(p_size + q_size)
+        self.__public_key = self.__get_public_key()
         self.__secret_key = self.__get_secret_key()
         self.__write_keys(prefix)
 
@@ -38,28 +38,13 @@ class KeyGenerator:
         """ Возвращает простое число заданной длины (в битах) """
 
         while True:
-            num = randprime(2 ** (n - 1), 2 ** n - 1)
-            # Берем только числа со старшим битом 1
-            # иначе будет не верная разрядность
-            if num >> n - 1 != 1:
-                break
+            num = randprime(2 ** (n - 1), 2 ** n)
             # Проверяем простоту числа по решету Эратосфена
             for i in KeyGenerator.sieve:
                 if num % i == 0:
                     break
             # Запускаем тест Ферма
             if KeyGenerator.test_fermat(num, n, 3):
-                return num
-
-    @staticmethod
-    def get_random_with_size(n: int) -> int:
-        """ Возвращает число взаимнопростое с заданным """
-
-        while True:
-            num = random.randrange(2 ** (n - 1), 2 ** n - 1)
-            # Берем только числа со старшим битом 1
-            # иначе будет не верная разрядность
-            if num >> n - 1 == 1:
                 return num
 
     @staticmethod
@@ -107,12 +92,12 @@ class KeyGenerator:
         if temp_phi == 1:
             return d + self.__euler
 
-    def __get_public_key(self, key_size) -> int:
+    def __get_public_key(self) -> int:
         """ Выбирает взаимнопростое число с self.euler и записывает его в файл """
-        e = self.get_random_with_size(key_size)
+        e = random.randrange(2, self.__euler)
         g = math.gcd(e, self.__euler)
         while g != 1:
-            e = self.get_random_with_size(key_size)
+            e = random.randrange(2, self.__euler)
             g = math.gcd(e, self.__euler)
         return e
 
@@ -121,14 +106,14 @@ class KeyGenerator:
         Вычисляет обратное значение от self.public_key, то есть чтобы
         self.public_key * self.secret_key = 1 (по модулю self.euler)
         """
-        return self.__euclidean()
+        return pow(self.__public_key, -1, self.__euler)
 
     def __write_keys(self, prefix: str) -> None:
         public_key_path = "{}.pub".format(prefix)
         secret_key_path = "{}.secret".format(prefix)
 
-        public_key = "{}/{}".format(hex(self.__public_key), hex(self.__euler)).upper()
-        secret_key = "{}/{}".format(hex(self.__secret_key), hex(self.__euler)).upper()
+        public_key = "{}/{}".format(hex(self.__public_key), hex(self.__module)).upper()
+        secret_key = "{}/{}".format(hex(self.__secret_key), hex(self.__module)).upper()
 
         with open(public_key_path, "w") as public_key_file:
             public_key_file.write(public_key)

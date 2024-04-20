@@ -4,13 +4,13 @@ import math
 class RSA:
     def __init__(self, public_key_path: str = None, secret_key_path: str = None):
         self.__public_key = None
-        self.__public_key_int = None
+        self.public_key_int = None
         self.__secret_key = None
-        self.__secret_key_int = None
+        self.secret_key_int = None
         self.__euler = None
         self.__euler_int = None
         self.__module = None
-        self.__module_int = None
+        self.module_int = None
         self.__block_size = None
         self.__get_keys(public_key_path, secret_key_path)
 
@@ -19,19 +19,19 @@ class RSA:
             with open(public_key_path, 'r') as f:
                 raw_data = f.read().split("/")
                 self.__public_key = raw_data[0]
-                self.__public_key_int = int(raw_data[0], 0)
+                self.public_key_int = int(raw_data[0], 0)
                 self.__module = raw_data[1]
 
         if secret_key_path:
             with open(secret_key_path, 'r') as f:
                 raw_data = f.read().split("/")
                 self.__secret_key = raw_data[0]
-                self.__secret_key_int = int(raw_data[0], 0)
+                self.secret_key_int = int(raw_data[0], 0)
                 self.__module = raw_data[1]
 
         if self.__module:
-            self.__module_int = int(self.__module, 0)
-            self.__block_size = int(math.log(self.__module_int, 2))
+            self.module_int = int(self.__module, 0)
+            self.__block_size = int(math.log(self.module_int, 2))
 
     @staticmethod
     def __read_file_as_binary(file_path: str) -> bytearray:
@@ -49,7 +49,7 @@ class RSA:
     def encrypt_block(self, block: bin) -> bin:
         block_integer = int(block, 2)
 
-        block_encrypt = pow(block_integer, self.__public_key_int, self.__module_int)
+        block_encrypt = pow(block_integer, self.public_key_int, self.module_int)
 
         # Тут длинну блоков проверил - всё работает нормально
         # print("RAW: ", len(block))
@@ -95,10 +95,10 @@ class RSA:
     def __str__(self):
         return {
             'public_key': self.__public_key,
-            'public_key_int': self.__public_key_int,
+            'public_key_int': self.public_key_int,
             'secret_key': self.__secret_key,
-            'secret_key_int': self.__secret_key_int,
+            'secret_key_int': self.secret_key_int,
             'module': self.__module,
-            'module_int': self.__module_int,
+            'module_int': self.module_int,
             'block_size': self.__block_size
         }
