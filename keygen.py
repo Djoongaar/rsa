@@ -29,7 +29,7 @@ class KeyGenerator:
         self.__q = self.get_primary_num(q_size)
         self.__module = self.__p * self.__q
         self.__euler = (self.__p - 1) * (self.__q - 1)
-        self.__public_key = self.__get_public_key()
+        self.__public_key = self.__get_public_key((p_size + q_size) // 2)
         self.__secret_key = self.__get_secret_key()
         self.__write_keys(prefix)
 
@@ -38,27 +38,26 @@ class KeyGenerator:
         """ Возвращает простое число заданной длины (в битах) """
 
         while True:
-            num = randprime(2 ** (n - 1), 2 ** n)
+            num = randprime(2 ** (n - 1), 2 ** n - 1)
             # Проверяем простоту числа по решету Эратосфена
             for i in KeyGenerator.sieve:
                 if num % i == 0:
                     break
             # Запускаем тест Ферма
-            if KeyGenerator.test_fermat(num, n, 3):
+            if KeyGenerator.test_fermat(num, 10):
                 return num
 
     @staticmethod
-    def test_fermat(num: int, n: int, iterations: int) -> bool:
+    def test_fermat(num: int, iterations: int) -> bool:
         """
         Проверка на простоту числа
         :param num: Число для проверки
-        :param n: Модуль алгоритма
         :param iterations: Количество итераций тестирования
         :return:
         """
         for i in range(iterations):
             a = random.randrange(2, num - 1)
-            r = pow(a, num-1, n)
+            r = pow(a, num-1, num)
             if r != 1:
                 return False
         return True
@@ -90,11 +89,11 @@ class KeyGenerator:
             y1 = y
 
         if temp_phi == 1:
-            return d + self.__euler
+            return d % self.__euler
 
-    def __get_public_key(self) -> int:
+    def __get_public_key(self, size) -> int:
         """ Выбирает взаимнопростое число с self.euler и записывает его в файл """
-        e = random.randrange(2, self.__euler)
+        e = self.get_primary_num(size)
         g = math.gcd(e, self.__euler)
         while g != 1:
             e = random.randrange(2, self.__euler)

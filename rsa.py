@@ -5,8 +5,10 @@ class RSA:
     def __init__(self, public_key_path: str = None, secret_key_path: str = None):
         self.__public_key = None
         self.public_key_int = None
+        self.public_key_size = None
         self.__secret_key = None
         self.secret_key_int = None
+        self.secret_key_size = None
         self.__euler = None
         self.__euler_int = None
         self.__module = None
@@ -21,6 +23,7 @@ class RSA:
                 raw_data = f.read().split("/")
                 self.__public_key = raw_data[0]
                 self.public_key_int = int(raw_data[0], 0)
+                self.public_key_size = len(bin(self.public_key_int)[2:])
                 self.__module = raw_data[1]
 
         if secret_key_path:
@@ -28,6 +31,7 @@ class RSA:
                 raw_data = f.read().split("/")
                 self.__secret_key = raw_data[0]
                 self.secret_key_int = int(raw_data[0], 0)
+                self.secret_key_size = len(bin(self.secret_key_int)[2:])
                 self.__module = raw_data[1]
 
         if self.__module:
@@ -43,7 +47,7 @@ class RSA:
 
     @staticmethod
     def __get_text_bin(open_text: bytearray) -> str:
-        return bin(int.from_bytes(open_text, byteorder="big", signed=False))
+        return bin(int.from_bytes(open_text, byteorder="big", signed=False))[2:]
 
     def encrypt_block(self, block: str) -> str:
         block_integer = int(block, 2)
@@ -125,8 +129,10 @@ class RSA:
         return {
             'public_key': self.__public_key,
             'public_key_int': self.public_key_int,
+            'public_key_size': self.public_key_size,
             'secret_key': self.__secret_key,
             'secret_key_int': self.secret_key_int,
+            'secret_key_size': self.secret_key_size,
             'module': self.__module,
             'module_int': self.module_int,
             'block_size': self.__block_size,
