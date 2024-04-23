@@ -64,8 +64,8 @@ class RSA:
         block_decrypt_bin = bin(block_decrypt_int)[2:].zfill(self.__block_size)
         return block_decrypt_bin
 
-    def encrypt(self, path_to_file: str) -> bytearray:
-        with open(path_to_file, mode="rb") as file:
+    def encrypt(self, source_file_path: str, encrypted_file_path: str):
+        with open(source_file_path, mode="rb") as file:
             open_text = bytearray(file.read())
 
         open_text_bin = self.__get_text_bin(open_text)
@@ -87,16 +87,15 @@ class RSA:
             result_bin = enc_block_bin + result_bin
 
         result_int = int(result_bin, 2)
+        length = math.ceil(len(result_bin) / 8)
 
-        result_bytes = bytearray(int.to_bytes(result_int, length=512, byteorder="big", signed=False))
+        result_bytes = bytearray(int.to_bytes(result_int, length=length, byteorder="big", signed=False))
 
-        with open("encrypted.txt", "wb") as file:
+        with open(encrypted_file_path, "wb") as file:
             file.write(result_bytes)
 
-        return result_bytes
-
-    def decrypt(self, path_to_file: str):
-        with open(path_to_file, "rb") as file:
+    def decrypt(self, encrypted_file_path: str, decrypted_file_path: str):
+        with open(encrypted_file_path, "rb") as file:
             cipher_text = bytearray(file.read())
 
         cipher_text_bin = self.__get_text_bin(cipher_text)
@@ -118,12 +117,16 @@ class RSA:
             result_bin = decr_block_bin + result_bin
 
         result_int = int(result_bin, 2)
-        result_bytes = bytearray(int.to_bytes(result_int, length=512, byteorder="big", signed=False))
+        length = math.ceil(len(result_bin) / 8)
 
-        with open("decrypted.txt", "wb") as file:
+        result_bytes = bytearray(int.to_bytes(result_int, length=length, byteorder="big", signed=False))
+        for num, _byte in enumerate(result_bytes):
+            if _byte != 0:
+                result_bytes = result_bytes[num:]
+                break
+
+        with open(decrypted_file_path, "wb") as file:
             file.write(result_bytes)
-
-        return result_bytes
 
     def __str__(self):
         return {
