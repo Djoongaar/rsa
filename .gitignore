@@ -3,3 +3,7 @@ venv
 __pycache__
 .DS_Store
 .ipynb_checkpoints
+*.public
+*.secret
+encrypted.*
+decrypted.*
