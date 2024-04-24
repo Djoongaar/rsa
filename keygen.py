@@ -62,35 +62,6 @@ class KeyGenerator:
                 return False
         return True
 
-    def __euclidean(self) -> int:
-        """
-        Расширенный алгоритм Евклида
-        :return: Число обратное числу e
-        """
-        d = 0
-        x1 = 0
-        x2 = 1
-        y1 = 1
-        temp_phi = self.__euler
-        e = self.__public_key
-
-        while e > 0:
-            temp1 = temp_phi // e
-            temp2 = temp_phi - temp1 * e
-            temp_phi = e
-            e = temp2
-
-            x = x2 - temp1 * x1
-            y = d - temp1 * y1
-
-            x2 = x1
-            x1 = x
-            d = y1
-            y1 = y
-
-        if temp_phi == 1:
-            return d % self.__euler
-
     def __get_public_key(self, size) -> int:
         """ Выбирает взаимнопростое число с self.euler и записывает его в файл """
         e = self.get_primary_num(size)
@@ -108,7 +79,7 @@ class KeyGenerator:
         return pow(self.__public_key, -1, self.__euler)
 
     def __write_keys(self, prefix: str) -> None:
-        public_key_path = "{}.pub".format(prefix)
+        public_key_path = "{}.public".format(prefix)
         secret_key_path = "{}.secret".format(prefix)
 
         public_key = "{}/{}".format(hex(self.__public_key), hex(self.__module)).upper()
