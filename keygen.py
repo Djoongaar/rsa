@@ -63,7 +63,7 @@ class KeyGenerator:
         return True
 
     def __get_public_key(self, size) -> int:
-        """ Выбирает взаимнопростое число с self.euler и записывает его в файл """
+        """ Выбирает взаимнопростое число с self.euler """
         e = self.get_primary_num(size)
         g = math.gcd(e, self.__euler)
         while g != 1:
