@@ -67,7 +67,7 @@ class KeyGenerator:
         e = self.get_primary_num(size)
         g = math.gcd(e, self.__euler)
         while g != 1:
-            e = random.randrange(2, self.__euler)
+            e = self.get_primary_num(size)
             g = math.gcd(e, self.__euler)
         return e
 
