@@ -9,8 +9,6 @@ class RSA:
         self.__secret_key = None
         self.secret_key_int = None
         self.secret_key_size = None
-        self.__euler = None
-        self.__euler_int = None
         self.__module = None
         self.module_int = None
         self.__block_size = None
